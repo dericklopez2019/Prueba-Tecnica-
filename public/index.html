@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CRM básico</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="barra">
+    <h1>CRM básico</h1>
+    <p class="barra-nota">Los datos se guardan únicamente en este navegador.</p>
+    <button type="button" id="reiniciar-datos" class="enlace">Restablecer datos de ejemplo</button>
+  </header>
+
+  <main class="contenido">
+    <aside class="columna-clientes">
+      <form id="form-cliente" class="formulario" novalidate>
+        <h2 id="titulo-form-cliente">Nuevo cliente</h2>
+
+        <label for="nombre">Nombre</label>
+        <input id="nombre" name="nombre" maxlength="150" autocomplete="off" required>
+        <small class="ayuda">Nombre completo de la persona o empresa. Máximo 150 caracteres.</small>
+
+        <label for="contacto">Contacto</label>
+        <input id="contacto" name="contacto" maxlength="100" autocomplete="off" required>
+        <small class="ayuda">Correo electrónico o número de teléfono.</small>
+
+        <div class="acciones">
+          <button type="submit">Guardar cliente</button>
+          <button type="button" id="cancelar-edicion" class="secundario" hidden>Cancelar</button>
+        </div>
+        <ul class="errores" hidden></ul>
+      </form>
+
+      <section class="listado">
+        <div class="listado-encabezado">
+          <h2>Clientes</h2>
+          <span id="contador-clientes" class="contador"></span>
+        </div>
+        <ul id="lista-clientes" class="lista-clientes"></ul>
+      </section>
+    </aside>
+
+    <section id="detalle" class="columna-detalle" aria-live="polite"></section>
+  </main>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

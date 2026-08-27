@@ -1,0 +1,156 @@
+:root {
+  --fondo: #f1f3f5;
+  --panel: #ffffff;
+  --borde: #d9dee3;
+  --texto: #1c2127;
+  --texto-suave: #5f6b7a;
+  --acento: #1f6f8b;
+  --acento-oscuro: #175a70;
+  --peligro: #b3261e;
+  --radio: 6px;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--texto);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  line-height: 1.45;
+}
+
+h1, h2, h3 { margin: 0; font-weight: 600; }
+h1 { font-size: 1.25rem; }
+h2 { font-size: 1.05rem; }
+h3 { font-size: 0.95rem; }
+
+.barra {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.9rem 1.5rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--borde);
+}
+.barra-nota { margin: 0; color: var(--texto-suave); font-size: 0.9rem; flex: 1; }
+
+.contenido {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.columna-clientes { display: flex; flex-direction: column; gap: 1.5rem; }
+.columna-detalle, .formulario, .listado {
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1.25rem;
+}
+
+/* Formularios */
+.formulario label { display: block; margin-top: 0.9rem; font-size: 0.9rem; font-weight: 600; }
+.formulario input, .formulario select {
+  width: 100%;
+  margin-top: 0.3rem;
+  padding: 0.5rem 0.6rem;
+  font: inherit;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: #fff;
+}
+.formulario input:focus, .formulario select:focus, button:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 1px;
+}
+.ayuda { display: block; margin-top: 0.3rem; color: var(--texto-suave); font-size: 0.8rem; }
+.acciones { display: flex; gap: 0.6rem; margin-top: 1rem; }
+
+.formulario.en-linea {
+  border: none;
+  border-top: 1px solid var(--borde);
+  border-radius: 0;
+  padding: 1rem 0 0;
+  margin-top: 1.25rem;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+.formulario.en-linea h3, .formulario.en-linea .errores { grid-column: 1 / -1; }
+.formulario.en-linea label { margin-top: 0; }
+
+/* Botones */
+button {
+  font: inherit;
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radio);
+  border: 1px solid var(--acento);
+  background: var(--acento);
+  color: #fff;
+  cursor: pointer;
+}
+button:hover { background: var(--acento-oscuro); }
+button.secundario { background: #fff; color: var(--acento); }
+button.secundario:hover { background: #eef4f7; }
+button.peligro { background: #fff; color: var(--peligro); border-color: var(--peligro); }
+button.peligro:hover { background: #fbeeed; }
+button.enlace {
+  background: none;
+  border: none;
+  color: var(--acento);
+  padding: 0;
+  text-decoration: underline;
+}
+button.enlace:hover { color: var(--acento-oscuro); background: none; }
+
+/* Listado de clientes */
+.listado-encabezado { display: flex; justify-content: space-between; align-items: baseline; }
+.contador { color: var(--texto-suave); font-size: 0.85rem; }
+.lista-clientes { list-style: none; margin: 0.75rem 0 0; padding: 0; }
+.lista-clientes li + li { border-top: 1px solid var(--borde); }
+.cliente {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-align: left;
+  padding: 0.7rem 0.6rem;
+  background: none;
+  border: none;
+  border-radius: var(--radio);
+  color: var(--texto);
+}
+.cliente:hover { background: #f4f7f9; }
+.cliente.activo { background: #e7f1f5; }
+.cliente-nombre { font-weight: 600; }
+.cliente-contacto, .cliente-meta { font-size: 0.85rem; color: var(--texto-suave); }
+
+/* Detalle */
+.detalle-encabezado { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+.detalle-encabezado h2 { font-size: 1.3rem; }
+.detalle-encabezado .acciones { margin-top: 0; }
+.detalle-contacto { margin: 0.25rem 0 0; color: var(--texto-suave); }
+.resumen { margin: 1rem 0; }
+
+table.oportunidades { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+table.oportunidades th, table.oportunidades td {
+  text-align: left;
+  padding: 0.55rem 0.5rem;
+  border-bottom: 1px solid var(--borde);
+}
+table.oportunidades th { font-size: 0.8rem; color: var(--texto-suave); text-transform: uppercase; letter-spacing: 0.03em; }
+table.oportunidades select { font: inherit; padding: 0.25rem; border: 1px solid var(--borde); border-radius: var(--radio); }
+.numero { text-align: right !important; font-variant-numeric: tabular-nums; }
+
+.vacio { color: var(--texto-suave); font-style: italic; }
+.errores { margin: 0.75rem 0 0; padding-left: 1.2rem; color: var(--peligro); font-size: 0.9rem; }
+
+@media (max-width: 800px) {
+  .contenido { grid-template-columns: 1fr; }
+  .formulario.en-linea { grid-template-columns: 1fr; }
+  .barra { flex-wrap: wrap; }
+}

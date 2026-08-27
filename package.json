@@ -1,0 +1,13 @@
+{
+  "name": "crm-prueba",
+  "version": "1.0.0",
+  "description": "CRM básico para prueba técnica. JavaScript vanilla, sin dependencias.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
