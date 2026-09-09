@@ -132,7 +132,11 @@ function renderizarDetalle() {
             <td>${escapar(o.titulo)}</td>
             <td class="numero">${formatoMoneda.format(o.monto)}</td>
             <td><select class="cambiar-etapa" aria-label="Etapa">${opcionesEtapa(o.etapa)}</select></td>
-            <td>${formatoFecha.format(new Date(o.creadoEn))}</td>
+            <td>
+              ${formatoFecha.format(new Date(o.creadoEn))}
+              <br>
+              <button type="button" class="ver-historial enlace" style="font-size: 0.8rem; margin-top: 4px;">Historial</button>
+            </td>
             <td>
               <button type="button" class="editar-oportunidad enlace">Editar</button>
               <button type="button" class="eliminar-oportunidad enlace">Eliminar</button>
@@ -173,7 +177,15 @@ function renderizarDetalle() {
         <button type="button" id="btn-cancelar-oportunidad" class="secundario" hidden>Cancelar</button>
       </div>
       <ul class="errores" hidden></ul>
-    </form>`;
+    </form>
+
+    <div id="contenedor-historial" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--borde);" hidden>
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem;">
+        <h3 id="titulo-historial" style="margin: 0;">Historial de etapas</h3>
+        <button type="button" id="cerrar-historial" class="enlace">Ocultar</button>
+      </div>
+      <ul id="lista-historial" class="historial-timeline"></ul>
+    </div>`;
 
   $('#editar-cliente').addEventListener('click', () => iniciarEdicionCliente(cliente));
   $('#eliminar-cliente').addEventListener('click', () => {
@@ -216,8 +228,17 @@ function manejarCambioEtapa(evento) {
   const id = select.closest('tr').dataset.id;
   const oportunidad = almacen.listarOportunidades().find((o) => o.id === id);
   if (!oportunidad) return;
-  almacen.guardarOportunidad(normalizarOportunidad({ ...oportunidad, etapa: select.value }));
-  renderizar();
+
+  const nuevaEtapa = select.value;
+  if (oportunidad.etapa !== nuevaEtapa) {
+    oportunidad.etapa = nuevaEtapa;
+    
+    if (!oportunidad.historial) oportunidad.historial = [];
+    oportunidad.historial.push({ etapa: nuevaEtapa, fecha: new Date().toISOString() });
+    
+    almacen.guardarOportunidad(normalizarOportunidad(oportunidad));
+    renderizarDetalle();
+  }
 }
 
 function manejarClicsDetalle(evento) {
@@ -227,7 +248,43 @@ function manejarClicsDetalle(evento) {
     manejarConfirmarEliminarOportunidad(evento);
   } else if (evento.target.closest('#btn-cancelar-oportunidad')) {
     cancelarEdicionOportunidad();
+  } else if (evento.target.closest('.ver-historial')) {
+    manejarVerHistorial(evento);
+  } else if (evento.target.closest('#cerrar-historial')) {
+    $('#contenedor-historial').hidden = true;
   }
+}
+
+function manejarVerHistorial(evento) {
+  const boton = evento.target.closest('.ver-historial');
+  if (!boton) return;
+  
+  const id = boton.closest('tr').dataset.id;
+  const oportunidad = almacen.listarOportunidades().find((o) => o.id === id);
+  if (!oportunidad) return;
+
+  const contenedor = $('#contenedor-historial');
+  const lista = $('#lista-historial');
+  const titulo = $('#titulo-historial');
+  const formatoFechaHora = new Intl.DateTimeFormat('es-GT', { dateStyle: 'medium', timeStyle: 'short' });
+
+  const historial = oportunidad.historial && oportunidad.historial.length > 0 
+    ? [...oportunidad.historial] 
+    : [{ etapa: oportunidad.etapa, fecha: oportunidad.creadoEn }];
+
+  const historialOrdenado = historial.reverse();
+
+  titulo.textContent = `Historial: ${escapar(oportunidad.titulo)}`;
+
+  lista.innerHTML = historialOrdenado.map(h => `
+    <li>
+      <strong>${escapar(h.etapa)}</strong>
+      <span class="fecha">${formatoFechaHora.format(new Date(h.fecha))}</span>
+    </li>
+  `).join('');
+
+  contenedor.hidden = false;
+  contenedor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function manejarEditarOportunidad(evento) {
@@ -313,6 +370,11 @@ function iniciar() {
       renderizar();
     }
   });
+
+  const btnCerrarModal = $('#cerrar-modal');
+  if (btnCerrarModal) {
+    btnCerrarModal.addEventListener('click', () => $('#modal-historial').close());
+  }
 
   renderizar();
 }
