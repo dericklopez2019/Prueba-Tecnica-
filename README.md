@@ -50,11 +50,11 @@ No agregues dependencias ni frameworks. El objetivo es evaluar tu criterio con J
 ##  Notas de la entrega 
 
 Implementaciones:
-4. Editar las Oportunidades
-3. Mensajes de confirmacion para eliminar datos
-5. Historial de registros en las etapas de Oportunidades
-1. Filtro de busquedas en los datos
-2. Paginacion en los datos∫
+1. Editar las Oportunidades
+2. Mensajes de confirmacion para eliminar datos
+3. Historial de registros en las etapas de Oportunidades
+4. Filtro de busquedas en los datos
+5. Paginacion en los datos∫
 
 Estas decisiones las tome conforme a mi experiencia al momento de obtener los datos y mostrarlos.
 El tener mensajes de confirmación ayuda al usuario a no cometer errores en eliminar datos que no quiera eliminar.
