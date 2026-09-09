@@ -12,6 +12,7 @@ import {
 const estado = {
   clienteSeleccionadoId: null,
   clienteEnEdicionId: null,
+  oportunidadEnEdicionId: null,
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -132,7 +133,10 @@ function renderizarDetalle() {
             <td class="numero">${formatoMoneda.format(o.monto)}</td>
             <td><select class="cambiar-etapa" aria-label="Etapa">${opcionesEtapa(o.etapa)}</select></td>
             <td>${formatoFecha.format(new Date(o.creadoEn))}</td>
-            <td><button type="button" class="eliminar-oportunidad enlace">Eliminar</button></td>
+            <td>
+              <button type="button" class="editar-oportunidad enlace">Editar</button>
+              <button type="button" class="eliminar-oportunidad enlace">Eliminar</button>
+            </td>
           </tr>`,
         )
         .join('')
@@ -154,17 +158,20 @@ function renderizarDetalle() {
 
     <table class="oportunidades">
       <thead>
-        <tr><th>Oportunidad</th><th class="numero">Monto</th><th>Etapa</th><th>Creada</th><th></th></tr>
+        <tr><th>Oportunidad</th><th class="numero">Monto</th><th>Etapa</th><th>Creada</th><th>Acciones</th></tr>
       </thead>
       <tbody>${filas}</tbody>
     </table>
 
     <form id="form-oportunidad" class="formulario en-linea" novalidate>
-      <h3>Nueva oportunidad</h3>
+      <h3 id="titulo-form-oportunidad">Nueva oportunidad</h3>
       <label>Título <input name="titulo" maxlength="80" required></label>
       <label>Monto (GTQ) <input name="monto" type="number" min="0" step="0.01" value="0"></label>
       <label>Etapa <select name="etapa">${opcionesEtapa(ETAPAS[0])}</select></label>
-      <button type="submit">Agregar</button>
+      <div style="display: flex; gap: 0.5rem;">
+        <button type="submit" id="btn-guardar-oportunidad">Agregar</button>
+        <button type="button" id="btn-cancelar-oportunidad" class="secundario" hidden>Cancelar</button>
+      </div>
       <ul class="errores" hidden></ul>
     </form>`;
 
@@ -183,7 +190,14 @@ function manejarFormularioOportunidad(evento) {
   evento.preventDefault();
   const formulario = evento.currentTarget;
   const datos = Object.fromEntries(new FormData(formulario));
-  const oportunidad = crearOportunidad({ ...datos, clienteId: estado.clienteSeleccionadoId });
+  
+  let oportunidad;
+  if (estado.oportunidadEnEdicionId) {
+    const existente = almacen.listarOportunidades().find((o) => o.id === estado.oportunidadEnEdicionId);
+    oportunidad = normalizarOportunidad({ ...existente, ...datos });
+  } else {
+    oportunidad = crearOportunidad({ ...datos, clienteId: estado.clienteSeleccionadoId });
+  }
 
   const errores = validarOportunidad(oportunidad);
   if (errores.length > 0) {
@@ -192,6 +206,7 @@ function manejarFormularioOportunidad(evento) {
   }
 
   almacen.guardarOportunidad(oportunidad);
+  estado.oportunidadEnEdicionId = null;
   renderizar();
 }
 
@@ -205,11 +220,58 @@ function manejarCambioEtapa(evento) {
   renderizar();
 }
 
-function manejarEliminarOportunidad(evento) {
+function manejarClicsDetalle(evento) {
+  if (evento.target.closest('.editar-oportunidad')) {
+    manejarEditarOportunidad(evento);
+  } else if (evento.target.closest('.eliminar-oportunidad')) {
+    manejarConfirmarEliminarOportunidad(evento);
+  } else if (evento.target.closest('#btn-cancelar-oportunidad')) {
+    cancelarEdicionOportunidad();
+  }
+}
+
+function manejarEditarOportunidad(evento) {
+  const boton = evento.target.closest('.editar-oportunidad');
+  if (!boton) return;
+  
+  const idOportunidad = boton.closest('tr').dataset.id;
+  iniciarEdicionOportunidad(idOportunidad);
+}
+
+function iniciarEdicionOportunidad(id) {
+  estado.oportunidadEnEdicionId = id;
+  const oportunidad = almacen.listarOportunidades().find((o) => o.id === id);
+  if (!oportunidad) return;
+
+  const formulario = $('#form-oportunidad');
+  formulario.elements.titulo.value = oportunidad.titulo;
+  formulario.elements.monto.value = oportunidad.monto;
+  formulario.elements.etapa.value = oportunidad.etapa;
+  
+  $('#titulo-form-oportunidad').textContent = 'Editar oportunidad';
+  $('#btn-guardar-oportunidad').textContent = 'Guardar';
+  $('#btn-cancelar-oportunidad').hidden = false;
+  
+  formulario.elements.titulo.focus();
+}
+
+function cancelarEdicionOportunidad() {
+  estado.oportunidadEnEdicionId = null;
+  renderizarDetalle();
+}
+
+function manejarConfirmarEliminarOportunidad(evento) {
   const boton = evento.target.closest('.eliminar-oportunidad');
   if (!boton) return;
-  almacen.eliminarOportunidad(boton.closest('tr').dataset.id);
-  renderizar();
+  
+  const fila = boton.closest('tr');
+  const idOportunidad = fila.dataset.id;
+  const tituloOportunidad = fila.querySelector('td').textContent;
+  
+  if (confirm(`¿Estás seguro de eliminar la oportunidad "${tituloOportunidad}"?`)) {
+    almacen.eliminarOportunidad(idOportunidad);
+    renderizar(); 
+  }
 }
 
 // ---------- Utilidades ----------
@@ -239,7 +301,8 @@ function iniciar() {
   });
 
   $('#detalle').addEventListener('change', manejarCambioEtapa);
-  $('#detalle').addEventListener('click', manejarEliminarOportunidad);
+  
+  $('#detalle').addEventListener('click', manejarClicsDetalle);
 
   $('#reiniciar-datos').addEventListener('click', () => {
     if (confirm('Esto borra todos los datos guardados en este navegador y vuelve a cargar los de ejemplo. ¿Continuar?')) {
