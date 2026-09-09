@@ -46,4 +46,17 @@ public/
 6. Comparte el enlace al repositorio (público o con acceso al evaluador).
 
 No agregues dependencias ni frameworks. El objetivo es evaluar tu criterio con JavaScript, HTML y CSS.
-# Prueba-T-cnica-
+
+##  Notas de la entrega 
+
+Implementaciones:
+4. Editar las Oportunidades
+3. Mensajes de confirmacion para eliminar datos
+5. Historial de registros en las etapas de Oportunidades
+1. Filtro de busquedas en los datos
+2. Paginacion en los datos∫
+
+Estas decisiones las tome conforme a mi experiencia al momento de obtener los datos y mostrarlos.
+El tener mensajes de confirmación ayuda al usuario a no cometer errores en eliminar datos que no quiera eliminar.
+Deje afuera trabajar por componentes y paginas ya que todo esta en una sola pagina.
+Utilice IA para auto completar código en algunas partes para tener una mejor idea de como mostrar la información correctamente, También la utilice para poder comprender unas partes del código respecto a como estaba estructurado el html en los .js.
