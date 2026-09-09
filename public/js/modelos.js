@@ -43,11 +43,17 @@ export function validarCliente(cliente) {
 
 export function normalizarOportunidad(oportunidad) {
   const monto = Number(oportunidad.monto);
+
+  const historial = Array.isArray(oportunidad.historial) 
+    ? oportunidad.historial 
+    : [{ etapa: oportunidad.etapa || ETAPAS[0], fecha: oportunidad.creadoEn || new Date().toISOString() }];
+
   return {
     ...oportunidad,
     titulo: recortar(oportunidad.titulo, LIMITES.TITULO),
     monto: Number.isFinite(monto) && monto >= 0 ? monto : 0,
     etapa: ETAPAS.includes(oportunidad.etapa) ? oportunidad.etapa : ETAPAS[0],
+    historial
   };
 }
 
