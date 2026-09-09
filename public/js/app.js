@@ -13,7 +13,11 @@ const estado = {
   clienteSeleccionadoId: null,
   clienteEnEdicionId: null,
   oportunidadEnEdicionId: null,
+  busquedaCliente: '',
+  paginaCliente: 1,
 };
+
+const CLIENTES_POR_PAGINA = 5;
 
 const $ = (selector) => document.querySelector(selector);
 
@@ -31,17 +35,35 @@ function escapar(texto) {
 // ---------- Clientes ----------
 
 function renderizarClientes() {
-  const clientes = almacen.listarClientes();
+  const todosLosClientes = almacen.listarClientes();
   const oportunidades = almacen.listarOportunidades();
   const lista = $('#lista-clientes');
-  $('#contador-clientes').textContent = `${clientes.length} cliente${clientes.length === 1 ? '' : 's'}`;
+  const paginacion = $('#paginacion-clientes');
 
-  if (clientes.length === 0) {
-    lista.innerHTML = '<li class="vacio">Aún no hay clientes. Registra el primero con el formulario.</li>';
+  const termino = estado.busquedaCliente.toLowerCase();
+  const clientesFiltrados = termino
+    ? todosLosClientes.filter(c => 
+        c.nombre.toLowerCase().includes(termino) || 
+        c.contacto.toLowerCase().includes(termino)
+      )
+    : todosLosClientes;
+
+  $('#contador-clientes').textContent = `${clientesFiltrados.length} cliente${clientesFiltrados.length === 1 ? '' : 's'}`;
+
+  if (clientesFiltrados.length === 0) {
+    lista.innerHTML = `<li class="vacio">${termino ? 'No hay resultados para tu búsqueda.' : 'Aún no hay clientes. Registra el primero.'}</li>`;
+    paginacion.innerHTML = '';
     return;
   }
 
-  lista.innerHTML = clientes
+  const totalPaginas = Math.ceil(clientesFiltrados.length / CLIENTES_POR_PAGINA);
+  if (estado.paginaCliente > totalPaginas) estado.paginaCliente = totalPaginas;
+  if (estado.paginaCliente < 1) estado.paginaCliente = 1;
+
+  const inicio = (estado.paginaCliente - 1) * CLIENTES_POR_PAGINA;
+  const clientesPagina = clientesFiltrados.slice(inicio, inicio + CLIENTES_POR_PAGINA);
+
+  lista.innerHTML = clientesPagina
     .map((cliente) => {
       const total = oportunidades.filter((o) => o.clienteId === cliente.id).length;
       const activo = cliente.id === estado.clienteSeleccionadoId ? 'activo' : '';
@@ -55,6 +77,16 @@ function renderizarClientes() {
         </li>`;
     })
     .join('');
+
+  if (totalPaginas > 1) {
+    paginacion.innerHTML = `
+      <button type="button" id="btn-prev-pagina" class="enlace" ${estado.paginaCliente === 1 ? 'disabled style="color: var(--texto-suave); text-decoration: none; cursor: default;"' : ''}>Anterior</button>
+      <span>Pág. ${estado.paginaCliente} de ${totalPaginas}</span>
+      <button type="button" id="btn-next-pagina" class="enlace" ${estado.paginaCliente === totalPaginas ? 'disabled style="color: var(--texto-suave); text-decoration: none; cursor: default;"' : ''}>Siguiente</button>
+    `;
+  } else {
+    paginacion.innerHTML = '';
+  }
 }
 
 function manejarFormularioCliente(evento) {
@@ -371,10 +403,20 @@ function iniciar() {
     }
   });
 
-  const btnCerrarModal = $('#cerrar-modal');
-  if (btnCerrarModal) {
-    btnCerrarModal.addEventListener('click', () => $('#modal-historial').close());
-  }
+  $('#buscar-cliente').addEventListener('input', (evento) => {
+    estado.busquedaCliente = evento.target.value;
+    estado.paginaCliente = 1;
+    renderizar();
+  });
+  $('#paginacion-clientes').addEventListener('click', (evento) => {
+    if (evento.target.closest('#btn-prev-pagina')) {
+      estado.paginaCliente--;
+      renderizar();
+    } else if (evento.target.closest('#btn-next-pagina')) {
+      estado.paginaCliente++;
+      renderizar();
+    }
+  });
 
   renderizar();
 }
