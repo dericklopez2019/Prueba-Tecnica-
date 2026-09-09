@@ -40,10 +40,10 @@ public/
 ## Entrega de la parte offline
 
 1. Crea tu propio repositorio a partir de este código (conserva el historial).
-2. Trabaja siguiendo **Git Flow**: las ramas `main` y `develop` ya existen; crea tu rama `feature/...` a partir de `develop` e intégrala ahí al terminar. Deja `main` intacta.
-3. Haz commits pequeños con mensajes descriptivos.
+2. Haz commits pequeños con mensajes descriptivos.
 4. Actualiza este README con una sección **Notas de la entrega**: qué implementaste, decisiones que tomaste, qué dejaste fuera y por qué.
 5. Si usaste herramientas de IA, indícalo en esa misma sección. No penaliza; nos interesa saber cómo trabajas.
 6. Comparte el enlace al repositorio (público o con acceso al evaluador).
 
 No agregues dependencias ni frameworks. El objetivo es evaluar tu criterio con JavaScript, HTML y CSS.
+# Prueba-T-cnica-
