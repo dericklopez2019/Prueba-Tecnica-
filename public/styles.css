@@ -142,9 +142,11 @@ table.oportunidades th, table.oportunidades td {
   padding: 0.55rem 0.5rem;
   border-bottom: 1px solid var(--borde);
 }
-table.oportunidades th { font-size: 0.8rem; color: var(--texto-suave); text-transform: uppercase; letter-spacing: 0.03em; }
+table.oportunidades th { font-size: 0.8rem; color: var(--texto-suave); text-transform: uppercase; letter-spacing: 0.03em; background-color: #f4f7f9; }
 table.oportunidades select { font: inherit; padding: 0.25rem; border: 1px solid var(--borde); border-radius: var(--radio); }
 .numero { text-align: right !important; font-variant-numeric: tabular-nums; }
+table.oportunidades tbody tr { transition: background-color 0.15s ease; }
+table.oportunidades tbody tr:hover { background-color: #f1f5f9; }
 
 .vacio { color: var(--texto-suave); font-style: italic; }
 .errores { margin: 0.75rem 0 0; padding-left: 1.2rem; color: var(--peligro); font-size: 0.9rem; }
