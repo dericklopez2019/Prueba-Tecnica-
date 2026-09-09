@@ -15,9 +15,12 @@ const estado = {
   oportunidadEnEdicionId: null,
   busquedaCliente: '',
   paginaCliente: 1,
+  busquedaOportunidad: '',
+  paginaOportunidad: 1,
 };
 
 const CLIENTES_POR_PAGINA = 5;
+const OPORTUNIDADES_POR_PAGINA = 5;
 
 const $ = (selector) => document.querySelector(selector);
 
@@ -144,20 +147,32 @@ function renderizarDetalle() {
     return;
   }
 
-  const oportunidades = almacen
+  const oportunidadesCliente = almacen
     .listarOportunidades()
     .filter((o) => o.clienteId === cliente.id)
     .sort((a, b) => b.creadoEn.localeCompare(a.creadoEn));
 
-  const totalAbierto = oportunidades
+  const totalAbierto = oportunidadesCliente
     .filter((o) => !['Ganada', 'Perdida'].includes(o.etapa))
     .reduce((suma, o) => suma + o.monto, 0);
 
   const opcionesEtapa = (seleccionada) =>
     ETAPAS.map((e) => `<option value="${e}" ${e === seleccionada ? 'selected' : ''}>${e}</option>`).join('');
 
-  const filas = oportunidades.length
-    ? oportunidades
+  const termino = estado.busquedaOportunidad.toLowerCase();
+  const oportunidadesFiltradas = termino
+    ? oportunidadesCliente.filter((o) => o.titulo.toLowerCase().includes(termino))
+    : oportunidadesCliente;
+
+  const totalPaginas = Math.ceil(oportunidadesFiltradas.length / OPORTUNIDADES_POR_PAGINA);
+  if (estado.paginaOportunidad > totalPaginas) estado.paginaOportunidad = totalPaginas;
+  if (estado.paginaOportunidad < 1) estado.paginaOportunidad = 1;
+
+  const inicio = (estado.paginaOportunidad - 1) * OPORTUNIDADES_POR_PAGINA;
+  const oportunidadesPagina = oportunidadesFiltradas.slice(inicio, inicio + OPORTUNIDADES_POR_PAGINA);
+
+  const filas = oportunidadesPagina.length
+    ? oportunidadesPagina
         .map(
           (o) => `
           <tr data-id="${o.id}">
@@ -192,12 +207,22 @@ function renderizarDetalle() {
 
     <p class="resumen">Pipeline abierto: <strong>${formatoMoneda.format(totalAbierto)}</strong></p>
 
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+      <input type="search" id="buscar-oportunidad" placeholder="Buscar oportunidad por título..." value="${escapar(estado.busquedaOportunidad)}" style="width: 260px; padding: 0.4rem 0.6rem; border: 1px solid var(--borde); border-radius: var(--radio);">
+    </div>
     <table class="oportunidades">
       <thead>
         <tr><th>Oportunidad</th><th class="numero">Monto</th><th>Etapa</th><th>Creada</th><th>Acciones</th></tr>
       </thead>
       <tbody>${filas}</tbody>
     </table>
+    <div id="paginacion-oportunidades" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; margin-bottom: 2rem; font-size: 0.85rem; font-weight: 500;">
+      ${totalPaginas > 1 ? `
+        <button type="button" id="btn-prev-oportunidad" class="enlace" ${estado.paginaOportunidad === 1 ? 'disabled style="color: var(--texto-suave); text-decoration: none; cursor: default;"' : ''}>Anterior</button>
+        <span>Pág. ${estado.paginaOportunidad} de ${totalPaginas}</span>
+        <button type="button" id="btn-next-oportunidad" class="enlace" ${estado.paginaOportunidad === totalPaginas ? 'disabled style="color: var(--texto-suave); text-decoration: none; cursor: default;"' : ''}>Siguiente</button>
+      ` : ''}
+    </div>
 
     <form id="form-oportunidad" class="formulario en-linea" novalidate>
       <h3 id="titulo-form-oportunidad">Nueva oportunidad</h3>
@@ -210,7 +235,7 @@ function renderizarDetalle() {
       </div>
       <ul class="errores" hidden></ul>
     </form>
-
+    
     <div id="contenedor-historial" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--borde);" hidden>
       <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem;">
         <h3 id="titulo-historial" style="margin: 0;">Historial de etapas</h3>
@@ -284,6 +309,12 @@ function manejarClicsDetalle(evento) {
     manejarVerHistorial(evento);
   } else if (evento.target.closest('#cerrar-historial')) {
     $('#contenedor-historial').hidden = true;
+  } else if (evento.target.id === 'btn-prev-oportunidad' && estado.paginaOportunidad > 1) {
+    estado.paginaOportunidad--;
+    renderizarDetalle();
+  } else if (evento.target.id === 'btn-next-oportunidad') {
+    estado.paginaOportunidad++;
+    renderizarDetalle();
   }
 }
 
@@ -386,6 +417,10 @@ function iniciar() {
     const boton = evento.target.closest('.cliente');
     if (!boton) return;
     estado.clienteSeleccionadoId = boton.dataset.id;
+    
+    estado.busquedaOportunidad = '';
+    estado.paginaOportunidad = 1;
+    
     renderizar();
   });
 
@@ -415,6 +450,20 @@ function iniciar() {
     } else if (evento.target.closest('#btn-next-pagina')) {
       estado.paginaCliente++;
       renderizar();
+    }
+  });
+  
+  $('#detalle').addEventListener('input', (evento) => {
+    if (evento.target.id === 'buscar-oportunidad') {
+      estado.busquedaOportunidad = evento.target.value;
+      estado.paginaOportunidad = 1;
+      renderizarDetalle();
+      
+      const input = $('#buscar-oportunidad');
+      if (input) {
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+      }
     }
   });
 
